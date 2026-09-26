@@ -1,0 +1,2524 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ngôi Nhà Gỗ — Business Simulator</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&display=swap');
+
+:root{
+  --bg:#efe7d8;
+  --card:#fffaf1;
+  --ink:#2d2924;
+  --ink-soft:#756d63;
+  --line:#ded1bc;
+  --green:#55745b;
+  --green-deep:#35533b;
+  --ochre:#c58a45;
+  --rust:#a6533f;
+  --gold:#d6a74b;
+  --wood1:#9b6b45;
+  --wood2:#70472e;
+  --white:#fff;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:"Work Sans",sans-serif;
+}
+
+button,
+input{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+.app{
+  max-width:1450px;
+  margin:auto;
+  padding:22px;
+}
+
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+  margin-bottom:18px;
+}
+
+.brand h1{
+  margin:0;
+  font-family:"Fraunces",serif;
+  font-size:32px;
+}
+
+.brand p{
+  margin:5px 0 0;
+  color:var(--ink-soft);
+}
+
+.top-stats{
+  display:grid;
+  grid-template-columns:repeat(5,auto);
+  gap:10px;
+}
+
+.stat{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:10px 14px;
+  min-width:120px;
+}
+
+.stat small{
+  display:block;
+  color:var(--ink-soft);
+  margin-bottom:3px;
+}
+
+.stat strong{
+  font-size:18px;
+}
+
+.layout{
+  display:grid;
+  grid-template-columns:minmax(0,1.55fr) minmax(350px,.95fr);
+  gap:18px;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 5px 20px rgba(80,55,30,.05);
+}
+
+.card h2{
+  margin:0 0 13px;
+  font-family:"Fraunces",serif;
+}
+
+.card h3{
+  margin:18px 0 9px;
+}
+
+.scene{
+  height:520px;
+  position:relative;
+  overflow:hidden;
+  border-radius:16px;
+  background:
+    linear-gradient(
+      to bottom,
+      #d8c3a4 0,
+      #d8c3a4 62%,
+      #9e714b 62%,
+      #805436 100%
+    );
+  border:1px solid #bda17f;
+}
+
+/* wall */
+.scene:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0,
+      transparent 80px,
+      rgba(80,50,30,.035) 81px,
+      transparent 82px
+    );
+}
+
+/* floor */
+.floor-lines{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:190px;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(70,40,20,.13) 0,
+      rgba(70,40,20,.13) 2px,
+      transparent 2px,
+      transparent 45px
+    );
+}
+
+/* window */
+.window{
+  position:absolute;
+  left:55px;
+  top:55px;
+  width:210px;
+  height:160px;
+  background:#b8d2d6;
+  border:13px solid #68452f;
+  box-shadow:inset 0 0 0 4px #9d714d;
+}
+
+.window:before,
+.window:after{
+  content:"";
+  position:absolute;
+  background:#68452f;
+}
+
+.window:before{
+  width:8px;
+  height:100%;
+  left:50%;
+  transform:translateX(-50%);
+}
+
+.window:after{
+  height:8px;
+  width:100%;
+  top:50%;
+  transform:translateY(-50%);
+}
+
+.cloud{
+  position:absolute;
+  width:45px;
+  height:18px;
+  border-radius:30px;
+  background:rgba(255,255,255,.6);
+  top:25px;
+  left:25px;
+}
+
+.cloud:nth-child(2){
+  top:90px;
+  left:115px;
+}
+
+/* sign */
+.sign{
+  position:absolute;
+  right:55px;
+  top:45px;
+  background:#fff5dd;
+  border:6px solid #765037;
+  padding:17px 25px;
+  transform:rotate(-2deg);
+  box-shadow:0 7px 12px rgba(0,0,0,.12);
+}
+
+.sign strong{
+  font-family:"Fraunces",serif;
+  font-size:24px;
+}
+
+/* lamp */
+.lamp{
+  position:absolute;
+  top:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:120px;
+  height:95px;
+}
+
+.lamp .wire{
+  width:3px;
+  height:40px;
+  background:#49372a;
+  margin:auto;
+}
+
+.lamp .shade{
+  width:85px;
+  height:50px;
+  background:#d29a4c;
+  border-radius:5px 5px 45px 45px;
+  margin:auto;
+  box-shadow:0 8px 30px rgba(255,204,90,.35);
+}
+
+/* rug */
+.rug{
+  position:absolute;
+  width:330px;
+  height:120px;
+  left:50%;
+  bottom:55px;
+  transform:translateX(-50%);
+  background:#b98d68;
+  border:5px solid #8d6244;
+  border-radius:50%;
+  opacity:.85;
+}
+
+/* counter */
+.counter{
+  position:absolute;
+  right:30px;
+  bottom:95px;
+  width:210px;
+  height:125px;
+  background:linear-gradient(#9d6d45,#70462d);
+  border:6px solid #5c3926;
+  border-radius:8px;
+  box-shadow:0 15px 20px rgba(0,0,0,.15);
+}
+
+.counter:before{
+  content:"";
+  position:absolute;
+  left:15px;
+  right:15px;
+  top:18px;
+  height:35px;
+  background:#b98a5d;
+  border-radius:5px;
+}
+
+/* sofa */
+.sofa{
+  position:absolute;
+  left:85px;
+  bottom:105px;
+  width:285px;
+  height:115px;
+  background:#70816b;
+  border-radius:28px 28px 12px 12px;
+  box-shadow:0 14px 20px rgba(0,0,0,.16);
+}
+
+.sofa:before{
+  content:"";
+  position:absolute;
+  left:-10px;
+  right:-10px;
+  bottom:-12px;
+  height:35px;
+  background:#554a3e;
+  border-radius:10px;
+}
+
+.cushion{
+  position:absolute;
+  top:18px;
+  width:105px;
+  height:55px;
+  background:#889a80;
+  border-radius:15px;
+}
+
+.cushion.one{
+  left:25px;
+}
+
+.cushion.two{
+  right:25px;
+}
+
+/* table */
+.table{
+  position:absolute;
+  left:420px;
+  bottom:85px;
+  width:180px;
+  height:80px;
+  background:#855535;
+  border-radius:50%;
+  box-shadow:0 12px 15px rgba(0,0,0,.16);
+}
+
+.table:before,
+.table:after{
+  content:"";
+  position:absolute;
+  bottom:-75px;
+  width:16px;
+  height:85px;
+  background:#684027;
+}
+
+.table:before{
+  left:35px;
+}
+
+.table:after{
+  right:35px;
+}
+
+/* plant */
+.plant{
+  position:absolute;
+  left:30px;
+  bottom:25px;
+  width:80px;
+  height:150px;
+}
+
+.pot{
+  position:absolute;
+  bottom:0;
+  left:20px;
+  width:42px;
+  height:48px;
+  background:#9e6242;
+  clip-path:polygon(10% 0,90% 0,78% 100%,22% 100%);
+}
+
+.leaf{
+  position:absolute;
+  width:34px;
+  height:55px;
+  background:#4f7253;
+  border-radius:100% 0;
+}
+
+.leaf.one{
+  left:25px;
+  top:10px;
+  transform:rotate(-25deg);
+}
+
+.leaf.two{
+  left:43px;
+  top:25px;
+  transform:rotate(20deg);
+}
+
+.leaf.three{
+  left:5px;
+  top:38px;
+  transform:rotate(-55deg);
+}
+
+.customer{
+  position:absolute;
+  right:260px;
+  bottom:90px;
+  width:115px;
+  height:220px;
+  animation:customerIn .4s ease;
+}
+
+@keyframes customerIn{
+  from{
+    transform:translateX(100px);
+    opacity:0;
+  }
+  to{
+    transform:translateX(0);
+    opacity:1;
+  }
+}
+
+.customer .head{
+  position:absolute;
+  width:58px;
+  height:58px;
+  border-radius:50%;
+  left:29px;
+  top:0;
+  background:#c88d6d;
+}
+
+.customer .hair{
+  position:absolute;
+  width:65px;
+  height:38px;
+  border-radius:40px 40px 15px 15px;
+  left:25px;
+  top:-5px;
+  background:#47382f;
+}
+
+.customer .body{
+  position:absolute;
+  top:60px;
+  left:12px;
+  width:90px;
+  height:120px;
+  border-radius:35px 35px 12px 12px;
+  background:#5d7180;
+}
+
+.customer .leg{
+  position:absolute;
+  top:165px;
+  width:22px;
+  height:55px;
+  background:#343b40;
+  border-radius:0 0 10px 10px;
+}
+
+.customer .leg.one{
+  left:30px;
+}
+
+.customer .leg.two{
+  left:65px;
+}
+
+.bubble{
+  position:absolute;
+  right:115px;
+  bottom:320px;
+  width:280px;
+  background:white;
+  border:2px solid var(--line);
+  border-radius:16px;
+  padding:14px;
+  box-shadow:0 10px 20px rgba(0,0,0,.1);
+}
+
+.bubble:after{
+  content:"";
+  position:absolute;
+  right:-13px;
+  bottom:20px;
+  width:20px;
+  height:20px;
+  background:white;
+  border-right:2px solid var(--line);
+  border-top:2px solid var(--line);
+  transform:rotate(45deg);
+}
+
+.scene-empty{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#765f4b;
+  font-size:20px;
+}
+
+/* buttons */
+.btn{
+  border:0;
+  border-radius:10px;
+  padding:10px 14px;
+  font-weight:600;
+  transition:.15s;
+}
+
+.btn:hover{
+  transform:translateY(-1px);
+}
+
+.btn.primary{
+  background:var(--green);
+  color:white;
+}
+
+.btn.primary:hover{
+  background:var(--green-deep);
+}
+
+.btn.secondary{
+  background:#eadcc7;
+  color:var(--ink);
+}
+
+.btn.warning{
+  background:#c78b45;
+  color:white;
+}
+
+.btn.danger{
+  background:#a6533f;
+  color:white;
+}
+
+.btn:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+  transform:none;
+}
+
+.actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+/* tables */
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,
+td{
+  padding:9px 7px;
+  border-bottom:1px solid var(--line);
+  text-align:left;
+  font-size:14px;
+}
+
+th{
+  color:var(--ink-soft);
+  font-size:12px;
+  text-transform:uppercase;
+}
+
+/* inventory */
+.inventory-item{
+  display:grid;
+  grid-template-columns:1.4fr .8fr .8fr 1fr;
+  gap:10px;
+  align-items:center;
+  padding:12px 0;
+  border-bottom:1px solid var(--line);
+}
+
+.inventory-item:last-child{
+  border-bottom:0;
+}
+
+.inventory-item small{
+  color:var(--ink-soft);
+  display:block;
+}
+
+.price-input{
+  width:100%;
+  padding:8px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:#fffdf8;
+}
+
+/* finance */
+.finance-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:9px;
+}
+
+.finance-box{
+  padding:11px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:#fffdf8;
+}
+
+.finance-box small{
+  color:var(--ink-soft);
+}
+
+.finance-box strong{
+  display:block;
+  margin-top:3px;
+}
+
+.profit-positive{
+  color:var(--green-deep);
+}
+
+.profit-negative{
+  color:var(--rust);
+}
+
+/* reviews */
+.review{
+  border-bottom:1px solid var(--line);
+  padding:11px 0;
+}
+
+.review:last-child{
+  border-bottom:0;
+}
+
+.stars{
+  color:#d49b36;
+}
+
+.reply{
+  margin-top:7px;
+  color:var(--green-deep);
+  font-size:13px;
+}
+
+/* log */
+.log{
+  max-height:230px;
+  overflow:auto;
+  background:#f5eee3;
+  border-radius:10px;
+  padding:10px;
+}
+
+.log-line{
+  padding:5px 0;
+  border-bottom:1px dashed #d7c8b3;
+  font-size:13px;
+}
+
+.log-line:last-child{
+  border-bottom:0;
+}
+
+/* customer panel */
+.customer-panel{
+  margin-top:15px;
+  padding:15px;
+  border-radius:13px;
+  background:#f3eadc;
+  border:1px solid var(--line);
+}
+
+.offer{
+  font-size:26px;
+  font-family:"Fraunces",serif;
+  margin:8px 0;
+}
+
+.counter-row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+}
+
+input[type="number"]{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:9px;
+  padding:9px;
+  background:white;
+}
+
+/* planning */
+.plan{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:9px;
+}
+
+.plan-box{
+  padding:10px;
+  background:#f6eee2;
+  border-radius:10px;
+}
+
+.plan-box small{
+  display:block;
+  color:var(--ink-soft);
+}
+
+.notice{
+  padding:10px 12px;
+  border-radius:10px;
+  background:#efe3ce;
+  margin-bottom:12px;
+  font-size:14px;
+}
+
+@media(max-width:1100px){
+  .layout{
+    grid-template-columns:1fr;
+  }
+
+  .top-stats{
+    grid-template-columns:repeat(3,1fr);
+  }
+}
+
+@media(max-width:700px){
+  .app{
+    padding:10px;
+  }
+
+  header{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .top-stats{
+    width:100%;
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .scene{
+    height:420px;
+  }
+
+  .window{
+    transform:scale(.75);
+    transform-origin:top left;
+  }
+
+  .sofa{
+    left:25px;
+    transform:scale(.75);
+    transform-origin:bottom left;
+  }
+
+  .table{
+    left:250px;
+    transform:scale(.7);
+    transform-origin:bottom left;
+  }
+
+  .counter{
+    right:10px;
+    transform:scale(.75);
+    transform-origin:bottom right;
+  }
+
+  .customer{
+    right:100px;
+    transform:scale(.75);
+    transform-origin:bottom right;
+  }
+
+  .bubble{
+    right:10px;
+    bottom:300px;
+    width:240px;
+  }
+
+  .inventory-item{
+    grid-template-columns:1fr 1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<header>
+  <div class="brand">
+    <h1>Ngôi Nhà Gỗ</h1>
+    <p>Furniture Shop — Business Simulator</p>
+  </div>
+
+  <div class="top-stats">
+    <div class="stat">
+      <small>Tiền mặt</small>
+      <strong id="cash">0đ</strong>
+    </div>
+
+    <div class="stat">
+      <small>Tài sản</small>
+      <strong id="assets">0đ</strong>
+    </div>
+
+    <div class="stat">
+      <small>Lãi/lỗ ngày</small>
+      <strong id="dailyProfit">0đ</strong>
+    </div>
+
+    <div class="stat">
+      <small>Ngày</small>
+      <strong id="day">1</strong>
+    </div>
+
+    <div class="stat">
+      <small>Uy tín</small>
+      <strong id="reputation">50/100</strong>
+    </div>
+  </div>
+</header>
+
+
+<div class="layout">
+
+<!-- LEFT -->
+<div>
+
+  <section class="card">
+    <h2>Showroom</h2>
+
+    <div class="scene" id="scene">
+
+      <div class="floor-lines"></div>
+
+      <div class="window">
+        <div class="cloud"></div>
+        <div class="cloud"></div>
+      </div>
+
+      <div class="sign">
+        <strong>NGÔI NHÀ GỖ</strong>
+      </div>
+
+      <div class="lamp">
+        <div class="wire"></div>
+        <div class="shade"></div>
+      </div>
+
+      <div class="rug"></div>
+
+      <div class="sofa">
+        <div class="cushion one"></div>
+        <div class="cushion two"></div>
+      </div>
+
+      <div class="table"></div>
+
+      <div class="counter"></div>
+
+      <div class="plant">
+        <div class="leaf one"></div>
+        <div class="leaf two"></div>
+        <div class="leaf three"></div>
+        <div class="pot"></div>
+      </div>
+
+      <div id="sceneCustomer"></div>
+
+    </div>
+
+    <div style="margin-top:12px">
+      <div class="actions">
+        <button class="btn primary" id="openShopBtn" onclick="openShop()">
+          Mở cửa đón khách
+        </button>
+
+        <button class="btn secondary" onclick="nextMarket()">
+          Cập nhật thị trường
+        </button>
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- CUSTOMER -->
+  <section class="card" style="margin-top:18px">
+
+    <h2>Khách hàng</h2>
+
+    <div id="customerArea">
+      <div class="notice">
+        Cửa hàng đang đóng. Hãy mở cửa để bắt đầu ngày kinh doanh.
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- MARKET -->
+  <section class="card" style="margin-top:18px">
+
+    <h2>Thị trường</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Sản phẩm</th>
+          <th>Giá vốn</th>
+          <th>Giá thị trường</th>
+          <th>Xu hướng</th>
+        </tr>
+      </thead>
+
+      <tbody id="marketTable"></tbody>
+    </table>
+
+  </section>
+
+
+  <!-- INVENTORY -->
+  <section class="card" style="margin-top:18px">
+
+    <h2>Kho hàng & định giá</h2>
+
+    <div id="inventory"></div>
+
+  </section>
+
+</div>
+
+
+<!-- RIGHT -->
+<div>
+
+  <!-- FINANCE -->
+  <section class="card">
+
+    <h2>Tài chính</h2>
+
+    <div class="finance-grid">
+
+      <div class="finance-box">
+        <small>Doanh thu</small>
+        <strong id="revenue">0đ</strong>
+      </div>
+
+      <div class="finance-box">
+        <small>Giá vốn hàng bán</small>
+        <strong id="cogs">0đ</strong>
+      </div>
+
+      <div class="finance-box">
+        <small>Chi phí vận hành</small>
+        <strong id="opex">0đ</strong>
+      </div>
+
+      <div class="finance-box">
+        <small>Nợ</small>
+        <strong id="debt">0đ</strong>
+      </div>
+
+    </div>
+
+    <h3>Quản lý doanh nghiệp</h3>
+
+    <div class="actions">
+
+      <button class="btn warning" onclick="advertise()">
+        Quảng cáo — 100k
+      </button>
+
+      <button class="btn primary" onclick="hireStaff()">
+        Thuê nhân viên — 500k
+      </button>
+
+      <button class="btn secondary" onclick="takeLoan()">
+        Vay 2 triệu
+      </button>
+
+    </div>
+
+    <div style="margin-top:12px">
+      <div class="plan">
+
+        <div class="plan-box">
+          <small>Nhân viên</small>
+          <strong id="staff">0</strong>
+        </div>
+
+        <div class="plan-box">
+          <small>Quảng cáo hôm nay</small>
+          <strong id="adLevel">0</strong>
+        </div>
+
+        <div class="plan-box">
+          <small>Chi phí/ngày</small>
+          <strong id="dailyCost">0đ</strong>
+        </div>
+
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- REVIEWS -->
+  <section class="card" style="margin-top:18px">
+
+    <h2>Đánh giá khách hàng</h2>
+
+    <div id="reviews"></div>
+
+  </section>
+
+
+  <!-- LOG -->
+  <section class="card" style="margin-top:18px">
+
+    <h2>Nhật ký kinh doanh</h2>
+
+    <div class="log" id="log"></div>
+
+  </section>
+
+
+  <!-- CONTROLS -->
+  <section class="card" style="margin-top:18px">
+
+    <h2>Quản lý</h2>
+
+    <div class="actions">
+
+      <button class="btn secondary" onclick="saveGame()">
+        Lưu game
+      </button>
+
+      <button class="btn danger" onclick="resetGame()">
+        Chơi lại
+      </button>
+
+    </div>
+
+  </section>
+
+</div>
+
+</div>
+</div>
+
+
+<script>
+
+const DEFAULT_ITEMS = [
+  {
+    id:"chair",
+    name:"Ghế gỗ tự nhiên",
+    cost:150000,
+    market:250000,
+    stock:3,
+    price:290000
+  },
+  {
+    id:"table",
+    name:"Bàn ăn 4 chỗ",
+    cost:800000,
+    market:1300000,
+    stock:2,
+    price:1450000
+  },
+  {
+    id:"sofa",
+    name:"Sofa vải bố",
+    cost:2000000,
+    market:3200000,
+    stock:1,
+    price:3500000
+  },
+  {
+    id:"shelf",
+    name:"Kệ sách gỗ thông",
+    cost:500000,
+    market:850000,
+    stock:2,
+    price:950000
+  },
+  {
+    id:"bed",
+    name:"Giường ngủ khung gỗ",
+    cost:1500000,
+    market:2400000,
+    stock:1,
+    price:2700000
+  },
+  {
+    id:"lamp",
+    name:"Đèn bàn học",
+    cost:80000,
+    market:150000,
+    stock:5,
+    price:180000
+  }
+];
+
+
+const CUSTOMER_TYPES = [
+  {
+    name:"Khách săn giá",
+    desc:"Rất nhạy cảm với giá. Có thể bỏ đi nếu giá quá cao.",
+    multiplier:.78,
+    tolerance:.9
+  },
+  {
+    name:"Khách bình thường",
+    desc:"Quan tâm cả giá và chất lượng.",
+    multiplier:1,
+    tolerance:1
+  },
+  {
+    name:"Khách cần gấp",
+    desc:"Cần mua nhanh và ít mặc cả hơn.",
+    multiplier:1.05,
+    tolerance:1.15
+  },
+  {
+    name:"Khách ưu tiên chất lượng",
+    desc:"Sẵn sàng trả thêm nếu sản phẩm có giá trị tốt.",
+    multiplier:1.12,
+    tolerance:1.2
+  }
+];
+
+
+let state = {
+  cash:5000000,
+  day:1,
+
+  reputation:50,
+
+  debt:0,
+
+  revenue:0,
+  cogs:0,
+  opex:0,
+  dailyProfit:0,
+
+  staff:0,
+  advertising:0,
+
+  inventory:JSON.parse(JSON.stringify(DEFAULT_ITEMS)),
+
+  market:JSON.parse(JSON.stringify(DEFAULT_ITEMS)),
+
+  reviews:[],
+
+  log:[],
+
+  customersToday:0,
+  customersServed:0,
+
+  shopOpen:false,
+
+  currentCustomer:null,
+
+  totalSales:0
+};
+
+
+function money(value){
+
+  return new Intl.NumberFormat("vi-VN")
+    .format(Math.round(value)) + "đ";
+
+}
+
+
+function saveGame(){
+
+  localStorage.setItem(
+    "furniture-shop-business-v3",
+    JSON.stringify(state)
+  );
+
+}
+
+
+function loadGame(){
+
+  const saved =
+    localStorage.getItem("furniture-shop-business-v3");
+
+  if(saved){
+
+    try{
+
+      state = JSON.parse(saved);
+
+    }catch(e){
+
+      console.error(e);
+
+    }
+
+  }
+
+}
+
+
+function resetGame(){
+
+  if(!confirm("Bạn chắc chắn muốn chơi lại từ đầu?")) return;
+
+  localStorage.removeItem("furniture-shop-business-v3");
+
+  location.reload();
+
+}
+
+
+function log(text){
+
+  const time =
+    new Date().toLocaleTimeString("vi-VN",{
+      hour:"2-digit",
+      minute:"2-digit"
+    });
+
+  state.log.unshift(
+    `[${time}] ${text}`
+  );
+
+  if(state.log.length > 100){
+
+    state.log.pop();
+
+  }
+
+  renderLog();
+
+}
+
+
+function renderLog(){
+
+  document.getElementById("log").innerHTML =
+    state.log
+      .map(x=>`<div class="log-line">${x}</div>`)
+      .join("");
+
+}
+
+
+function getInventoryValue(){
+
+  return state.inventory.reduce(
+    (sum,item)=>
+      sum + item.stock * item.cost,
+    0
+  );
+
+}
+
+
+function getAssets(){
+
+  return state.cash +
+    getInventoryValue() -
+    state.debt;
+
+}
+
+
+function renderStats(){
+
+  document.getElementById("cash").textContent =
+    money(state.cash);
+
+  document.getElementById("assets").textContent =
+    money(getAssets());
+
+  const profit =
+    document.getElementById("dailyProfit");
+
+  profit.textContent =
+    money(state.dailyProfit);
+
+  profit.className =
+    state.dailyProfit >= 0
+      ? "profit-positive"
+      : "profit-negative";
+
+  document.getElementById("day").textContent =
+    state.day;
+
+  document.getElementById("reputation").textContent =
+    Math.round(state.reputation) + "/100";
+
+  document.getElementById("revenue").textContent =
+    money(state.revenue);
+
+  document.getElementById("cogs").textContent =
+    money(state.cogs);
+
+  document.getElementById("opex").textContent =
+    money(state.opex);
+
+  document.getElementById("debt").textContent =
+    money(state.debt);
+
+  document.getElementById("staff").textContent =
+    state.staff;
+
+  document.getElementById("adLevel").textContent =
+    state.advertising;
+
+  document.getElementById("dailyCost").textContent =
+    money(
+      50000 +
+      state.staff * 150000
+    );
+
+}
+
+
+function renderMarket(){
+
+  const tbody =
+    document.getElementById("marketTable");
+
+  tbody.innerHTML =
+    state.market.map(item=>{
+
+      const original =
+        DEFAULT_ITEMS.find(
+          x=>x.id===item.id
+        );
+
+      let trend =
+        item.market > original.market * 1.05
+          ? "↑ Tăng"
+          : item.market < original.market * .95
+            ? "↓ Giảm"
+            : "→ Ổn định";
+
+      return `
+        <tr>
+          <td>${item.name}</td>
+          <td>${money(item.cost)}</td>
+          <td>${money(item.market)}</td>
+          <td>${trend}</td>
+        </tr>
+      `;
+
+    }).join("");
+
+}
+
+
+function renderInventory(){
+
+  const el =
+    document.getElementById("inventory");
+
+  el.innerHTML =
+    state.inventory.map(item=>{
+
+      const market =
+        state.market.find(
+          x=>x.id===item.id
+        );
+
+      return `
+        <div class="inventory-item">
+
+          <div>
+            <strong>${item.name}</strong>
+            <small>
+              Giá vốn: ${money(item.cost)}
+            </small>
+          </div>
+
+          <div>
+            <strong>${item.stock}</strong>
+            <small>Trong kho</small>
+          </div>
+
+          <div>
+            <strong>${money(market.market)}</strong>
+            <small>Thị trường</small>
+          </div>
+
+          <div>
+
+            <input
+              class="price-input"
+              type="number"
+              min="${item.cost}"
+              value="${item.price}"
+              onchange="changePrice('${item.id}',this.value)"
+            >
+
+            <button
+              class="btn secondary"
+              style="width:100%;margin-top:5px"
+              onclick="buyStock('${item.id}')"
+            >
+              Nhập 1 — ${money(item.cost)}
+            </button>
+
+          </div>
+
+        </div>
+      `;
+
+    }).join("");
+
+}
+
+
+function changePrice(id,value){
+
+  const item =
+    state.inventory.find(
+      x=>x.id===id
+    );
+
+  const price =
+    Number(value);
+
+  if(!item) return;
+
+  if(price < item.cost){
+
+    alert(
+      "Giá bán không được thấp hơn giá vốn."
+    );
+
+    renderInventory();
+
+    return;
+
+  }
+
+  item.price = price;
+
+  saveGame();
+
+}
+
+
+function buyStock(id){
+
+  const item =
+    state.inventory.find(
+      x=>x.id===id
+    );
+
+  if(!item) return;
+
+  if(state.cash < item.cost){
+
+    alert("Không đủ tiền để nhập hàng.");
+
+    return;
+
+  }
+
+  state.cash -= item.cost;
+
+  item.stock++;
+
+  log(
+    `Nhập 1 ${item.name}, chi ${money(item.cost)}.`
+  );
+
+  renderAll();
+
+}
+
+
+function nextMarket(){
+
+  state.market.forEach(item=>{
+
+    const change =
+      1 +
+      (Math.random()*.24 - .12);
+
+    item.market =
+      Math.max(
+        item.cost * 1.05,
+        Math.round(
+          item.market * change / 1000
+        ) * 1000
+      );
+
+  });
+
+  log("Thị trường vừa có biến động giá.");
+
+  renderAll();
+
+}
+
+
+function advertise(){
+
+  if(state.advertising >= 3){
+
+    alert(
+      "Bạn đã đạt mức quảng cáo tối đa trong ngày."
+    );
+
+    return;
+
+  }
+
+  if(state.cash < 100000){
+
+    alert("Không đủ tiền quảng cáo.");
+
+    return;
+
+  }
+
+  state.cash -= 100000;
+
+  state.advertising++;
+
+  state.opex += 100000;
+
+  log(
+    "Đã chi 100.000đ cho quảng cáo."
+  );
+
+  renderAll();
+
+}
+
+
+function hireStaff(){
+
+  if(state.cash < 500000){
+
+    alert("Không đủ tiền để thuê nhân viên.");
+
+    return;
+
+  }
+
+  state.cash -= 500000;
+
+  state.staff++;
+
+  state.opex += 500000;
+
+  log(
+    `Đã thuê nhân viên mới. Tổng nhân viên: ${state.staff}.`
+  );
+
+  renderAll();
+
+}
+
+
+function takeLoan(){
+
+  if(state.debt >= 5000000){
+
+    alert(
+      "Ngân hàng không cho vay thêm. Hạn mức nợ hiện tại là 5 triệu."
+    );
+
+    return;
+
+  }
+
+  state.cash += 2000000;
+
+  state.debt += 2000000;
+
+  log(
+    "Bạn vay 2.000.000đ. Lãi suất cuối ngày là 1,5%."
+  );
+
+  renderAll();
+
+}
+
+
+function getCustomerCount(){
+
+  const base =
+    2 +
+    Math.floor(Math.random()*3);
+
+  return Math.min(
+    7,
+    base +
+    state.staff +
+    state.advertising
+  );
+
+}
+
+
+function openShop(){
+
+  if(state.shopOpen){
+
+    return;
+
+  }
+
+  state.shopOpen = true;
+
+  state.customersToday =
+    getCustomerCount();
+
+  state.customersServed = 0;
+
+  state.currentCustomer = null;
+
+  document.getElementById(
+    "openShopBtn"
+  ).disabled = true;
+
+  log(
+    `Cửa hàng mở cửa. Dự kiến có ${state.customersToday} khách hôm nay.`
+  );
+
+  nextCustomer();
+
+}
+
+
+function nextCustomer(){
+
+  if(
+    state.customersServed >=
+    state.customersToday
+  ){
+
+    endDay();
+
+    return;
+
+  }
+
+  const available =
+    state.inventory.filter(
+      x=>x.stock > 0
+    );
+
+  if(available.length === 0){
+
+    log(
+      "Kho hết hàng. Không thể tiếp tục bán."
+    );
+
+    endDay();
+
+    return;
+
+  }
+
+  const item =
+    available[
+      Math.floor(
+        Math.random()*available.length
+      )
+    ];
+
+  const type =
+    CUSTOMER_TYPES[
+      Math.floor(
+        Math.random()*CUSTOMER_TYPES.length
+      )
+    ];
+
+  const market =
+    state.market.find(
+      x=>x.id===item.id
+    );
+
+  const baseOffer =
+    item.price *
+    (.55 + Math.random()*.25) *
+    type.multiplier;
+
+  const offer =
+    Math.max(
+      item.cost,
+      Math.round(baseOffer / 1000) * 1000
+    );
+
+  const maxPrice =
+    market.market *
+    type.tolerance;
+
+  state.currentCustomer = {
+    itemId:item.id,
+    type,
+    offer,
+    maxPrice,
+    round:0
+  };
+
+  renderCustomer();
+
+}
+
+
+function customerSvg(){
+
+  return `
+    <div class="customer">
+
+      <div class="head"></div>
+
+      <div class="hair"></div>
+
+      <div class="body"></div>
+
+      <div class="leg one"></div>
+
+      <div class="leg two"></div>
+
+    </div>
+  `;
+
+}
+
+
+function renderCustomer(){
+
+  const c =
+    state.currentCustomer;
+
+  if(!c){
+
+    document.getElementById(
+      "sceneCustomer"
+    ).innerHTML = "";
+
+    return;
+
+  }
+
+  const item =
+    state.inventory.find(
+      x=>x.id===c.itemId
+    );
+
+  document.getElementById(
+    "sceneCustomer"
+  ).innerHTML =
+    customerSvg();
+
+  document.getElementById(
+    "customerArea"
+  ).innerHTML = `
+
+    <div class="customer-panel">
+
+      <strong>
+        ${c.type.name}
+      </strong>
+
+      <p style="color:var(--ink-soft)">
+        ${c.type.desc}
+      </p>
+
+      <p>
+        Khách đang hỏi:
+        <strong>${item.name}</strong>
+      </p>
+
+      <div class="offer">
+        ${money(c.offer)}
+      </div>
+
+      <p>
+        Khách đề nghị mức giá trên.
+      </p>
+
+      <div class="actions">
+
+        <button
+          class="btn primary"
+          onclick="acceptOffer()"
+        >
+          Chấp nhận
+        </button>
+
+        <button
+          class="btn secondary"
+          onclick="showCounter()"
+        >
+          Mặc cả
+        </button>
+
+        <button
+          class="btn danger"
+          onclick="refuseOffer()"
+        >
+          Từ chối
+        </button>
+
+      </div>
+
+      <div id="counterBox"></div>
+
+    </div>
+  `;
+
+}
+
+
+function acceptOffer(){
+
+  const c =
+    state.currentCustomer;
+
+  if(!c) return;
+
+  const item =
+    state.inventory.find(
+      x=>x.id===c.itemId
+    );
+
+  if(c.offer < item.cost){
+
+    refuseOffer();
+
+    return;
+
+  }
+
+  finalizeSale(c.offer);
+
+}
+
+
+function showCounter(){
+
+  const c =
+    state.currentCustomer;
+
+  if(!c) return;
+
+  const item =
+    state.inventory.find(
+      x=>x.id===c.itemId
+    );
+
+  const suggested =
+    Math.round(
+      Math.max(
+        c.offer + (item.price-c.offer)*.45,
+        item.cost
+      ) / 1000
+    ) * 1000;
+
+  document.getElementById(
+    "counterBox"
+  ).innerHTML = `
+
+    <div style="margin-top:12px">
+
+      <div class="counter-row">
+
+        <input
+          id="counterInput"
+          type="number"
+          value="${suggested}"
+          min="${item.cost}"
+        >
+
+        <button
+          class="btn warning"
+          onclick="submitCounter()"
+        >
+          Gửi giá
+        </button>
+
+      </div>
+
+      <small>
+        Giá tối đa khách có thể chấp nhận:
+        khoảng ${money(c.maxPrice)}
+      </small>
+
+    </div>
+  `;
+
+}
+
+
+function submitCounter(){
+
+  const c =
+    state.currentCustomer;
+
+  if(!c) return;
+
+  const item =
+    state.inventory.find(
+      x=>x.id===c.itemId
+    );
+
+  const price =
+    Number(
+      document.getElementById(
+        "counterInput"
+      ).value
+    );
+
+  if(
+    !price ||
+    price < item.cost
+  ){
+
+    alert(
+      "Giá phải lớn hơn hoặc bằng giá vốn."
+    );
+
+    return;
+
+  }
+
+  c.round++;
+
+  if(price <= c.maxPrice){
+
+    const probability =
+      Math.max(
+        .2,
+        1 -
+        (price-c.offer) /
+        Math.max(
+          1,
+          c.maxPrice-c.offer
+        ) * .55
+      );
+
+    if(Math.random() < probability){
+
+      finalizeSale(price);
+
+    }else{
+
+      c.offer =
+        Math.round(
+          (
+            c.offer +
+            price
+          ) / 2 / 1000
+        ) * 1000;
+
+      if(c.round >= 2){
+
+        walkAway();
+
+      }else{
+
+        renderCustomer();
+
+        document.getElementById(
+          "counterBox"
+        ).innerHTML = `
+
+          <div style="margin-top:10px">
+
+            <div class="notice">
+              Khách chưa đồng ý và trả giá
+              <strong>${money(c.offer)}</strong>.
+            </div>
+
+            <div class="counter-row">
+
+              <input
+                id="counterInput"
+                type="number"
+                value="${c.offer}"
+                min="${item.cost}"
+              >
+
+              <button
+                class="btn warning"
+                onclick="submitCounter()"
+              >
+                Gửi giá
+              </button>
+
+            </div>
+
+          </div>
+        `;
+
+      }
+
+    }
+
+  }else{
+
+    walkAway();
+
+  }
+
+}
+
+
+function refuseOffer(){
+
+  log(
+    "Bạn từ chối yêu cầu của khách."
+  );
+
+  state.reputation =
+    Math.max(
+      0,
+      state.reputation - .5
+    );
+
+  nextCustomerAfterInteraction();
+
+}
+
+
+function walkAway(){
+
+  state.reputation =
+    Math.max(
+      0,
+      state.reputation - 1
+    );
+
+  addReview(
+    2,
+    "Giá hơi khó thương lượng."
+  );
+
+  log(
+    "Khách không đồng ý và rời cửa hàng."
+  );
+
+  nextCustomerAfterInteraction();
+
+}
+
+
+function finalizeSale(price){
+
+  const c =
+    state.currentCustomer;
+
+  const item =
+    state.inventory.find(
+      x=>x.id===c.itemId
+    );
+
+  if(!item || item.stock <= 0){
+
+    alert("Sản phẩm đã hết hàng.");
+
+    nextCustomerAfterInteraction();
+
+    return;
+
+  }
+
+  const cogs =
+    item.cost;
+
+  item.stock--;
+
+  state.cash += price;
+
+  state.revenue += price;
+
+  state.cogs += cogs;
+
+  state.totalSales++;
+
+  const market =
+    state.market.find(
+      x=>x.id===item.id
+    );
+
+  let rating = 5;
+
+  if(
+    price >
+    market.market * 1.25
+  ){
+
+    rating = 3;
+
+  }else if(
+    price >
+    market.market * 1.1
+  ){
+
+    rating = 4;
+
+  }
+
+  state.reputation =
+    Math.min(
+      100,
+      state.reputation +
+      (rating-3)*.7
+    );
+
+  addReview(
+    rating,
+    `Đã mua ${item.name} với giá ${money(price)}.`
+  );
+
+  log(
+    `Bán ${item.name} với giá ${money(price)} — lãi gộp ${money(price-cogs)}.`
+  );
+
+  nextCustomerAfterInteraction();
+
+}
+
+
+function nextCustomerAfterInteraction(){
+
+  state.customersServed++;
+
+  state.currentCustomer = null;
+
+  document.getElementById(
+    "sceneCustomer"
+  ).innerHTML = "";
+
+  setTimeout(
+    ()=>{
+      if(state.shopOpen){
+
+        nextCustomer();
+
+      }
+    },
+    350
+  );
+
+}
+
+
+function addReview(rating,text){
+
+  state.reviews.unshift({
+    rating,
+    text,
+    reply:null
+  });
+
+  if(state.reviews.length > 10){
+
+    state.reviews.pop();
+
+  }
+
+  renderReviews();
+
+}
+
+
+function replyReview(index){
+
+  const review =
+    state.reviews[index];
+
+  if(!review || review.reply){
+
+    return;
+
+  }
+
+  review.reply =
+    "Cảm ơn bạn đã ghé Ngôi Nhà Gỗ!";
+
+  state.reputation =
+    Math.min(
+      100,
+      state.reputation + .3
+    );
+
+  log(
+    "Bạn đã phản hồi một đánh giá của khách."
+  );
+
+  renderReviews();
+
+  saveGame();
+
+}
+
+
+function renderReviews(){
+
+  const el =
+    document.getElementById("reviews");
+
+  if(!state.reviews.length){
+
+    el.innerHTML =
+      `<div class="notice">
+        Chưa có đánh giá nào.
+      </div>`;
+
+    return;
+
+  }
+
+  el.innerHTML =
+    state.reviews.map(
+      (review,index)=>`
+
+        <div class="review">
+
+          <div class="stars">
+            ${"★".repeat(review.rating)}
+            ${"☆".repeat(5-review.rating)}
+          </div>
+
+          <div>
+            ${review.text}
+          </div>
+
+          ${
+            review.reply
+              ? `<div class="reply">
+                  Chủ shop: ${review.reply}
+                </div>`
+              : `
+                <button
+                  class="btn secondary"
+                  style="margin-top:6px"
+                  onclick="replyReview(${index})"
+                >
+                  Trả lời
+                </button>
+              `
+          }
+
+        </div>
+
+      `
+    ).join("");
+
+}
+
+
+function endDay(){
+
+  state.shopOpen = false;
+
+  document.getElementById(
+    "openShopBtn"
+  ).disabled = false;
+
+  document.getElementById(
+    "openShopBtn"
+  ).textContent =
+    "Mở cửa ngày tiếp theo";
+
+  state.currentCustomer = null;
+
+  document.getElementById(
+    "sceneCustomer"
+  ).innerHTML = "";
+
+  /* fixed operating cost */
+
+  const baseCost = 50000;
+
+  const staffCost =
+    state.staff * 150000;
+
+  const interest =
+    state.debt * .015;
+
+  const totalCost =
+    baseCost +
+    staffCost +
+    interest;
+
+  state.cash -= totalCost;
+
+  state.opex +=
+    baseCost +
+    staffCost +
+    interest;
+
+  /* profit */
+
+  state.dailyProfit =
+    state.revenue -
+    state.cogs -
+    state.opex;
+
+  log(
+    `Kết thúc ngày ${state.day}: doanh thu ${money(state.revenue)}, chi phí ${money(state.opex)}, lãi/lỗ ${money(state.dailyProfit)}.`
+  );
+
+  if(interest > 0){
+
+    log(
+      `Đã trả ${money(interest)} tiền lãi vay.`
+    );
+
+  }
+
+  if(state.cash < 0){
+
+    const deficit =
+      Math.abs(state.cash);
+
+    state.debt += deficit;
+
+    state.cash = 0;
+
+    log(
+      `Thiếu tiền mặt ${money(deficit)}, khoản thiếu được chuyển thành nợ.`
+    );
+
+  }
+
+  if(state.reputation < 20){
+
+    log(
+      "Uy tín cửa hàng đang rất thấp."
+    );
+
+  }
+
+  if(
+    state.cash === 0 &&
+    state.debt >= 10000000
+  ){
+
+    alert(
+      "Cửa hàng đang mất khả năng thanh toán. Hãy giảm chi phí và tăng lợi nhuận."
+    );
+
+  }
+
+  state.day++;
+
+  state.revenue = 0;
+
+  state.cogs = 0;
+
+  state.opex = 0;
+
+  state.dailyProfit = 0;
+
+  state.advertising = 0;
+
+  state.customersToday = 0;
+
+  state.customersServed = 0;
+
+  nextMarket();
+
+  saveGame();
+
+  renderAll();
+
+}
+
+
+function renderCustomer(){
+
+  const c =
+    state.currentCustomer;
+
+  if(!c){
+
+    document.getElementById(
+      "customerArea"
+    ).innerHTML = `
+      <div class="notice">
+        Không có khách hàng hiện tại.
+      </div>
+    `;
+
+    return;
+
+  }
+
+  const item =
+    state.inventory.find(
+      x=>x.id===c.itemId
+    );
+
+  document.getElementById(
+    "sceneCustomer"
+  ).innerHTML =
+    customerSvg();
+
+  document.getElementById(
+    "customerArea"
+  ).innerHTML = `
+
+    <div class="customer-panel">
+
+      <strong>
+        ${c.type.name}
+      </strong>
+
+      <p style="color:var(--ink-soft)">
+        ${c.type.desc}
+      </p>
+
+      <p>
+        Khách muốn mua:
+        <strong>${item.name}</strong>
+      </p>
+
+      <div class="offer">
+        ${money(c.offer)}
+      </div>
+
+      <div class="actions">
+
+        <button
+          class="btn primary"
+          onclick="acceptOffer()"
+        >
+          Chấp nhận
+        </button>
+
+        <button
+          class="btn secondary"
+          onclick="showCounter()"
+        >
+          Mặc cả
+        </button>
+
+        <button
+          class="btn danger"
+          onclick="refuseOffer()"
+        >
+          Từ chối
+        </button>
+
+      </div>
+
+      <div id="counterBox"></div>
+
+    </div>
+  `;
+
+}
+
+
+function renderAll(){
+
+  renderStats();
+
+  renderMarket();
+
+  renderInventory();
+
+  renderReviews();
+
+  renderLog();
+
+  if(state.currentCustomer){
+
+    renderCustomer();
+
+  }else if(!state.shopOpen){
+
+    document.getElementById(
+      "customerArea"
+    ).innerHTML = `
+      <div class="notice">
+        Cửa hàng đang đóng. Hãy mở cửa để bắt đầu kinh doanh.
+      </div>
+    `;
+
+  }
+
+  saveGame();
+
+}
+
+
+loadGame();
+
+renderAll();
+
+</script>
+
+</body>
+</html>
